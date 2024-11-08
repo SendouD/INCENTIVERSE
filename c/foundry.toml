@@ -1,0 +1,13 @@
+[profile.default]
+src = "src"
+out = "out"
+libs = ["lib"]
+
+remappings = ['@openzeppelin/contracts=lib/openzeppelin-contracts/contracts']
+
+[etherscan]
+
+[rpc_endpoints]
+sepolia = "${SEPOLIA_RPC_URL}"
+
+# See more config options https://github.com/foundry-rs/foundry/tree/master/config
