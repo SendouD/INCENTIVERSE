@@ -6,8 +6,7 @@ import { NextRequest, NextResponse } from 'next/server';
 // Connect to the database
 connectDB();
 
- async function handler(req: NextRequest, res: NextResponse) {
-   
+async function handler(req: NextRequest, res: NextResponse) {
   if (req.method === 'POST') {
 
     const body=await req.json();
@@ -38,6 +37,7 @@ connectDB();
     return NextResponse.json({ message: 'Method Not Allowed' });
   }
 }
+
+
+
 export const POST= handler;
-
-
