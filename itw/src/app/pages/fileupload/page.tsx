@@ -2,9 +2,11 @@
 
 import React, { useState } from 'react'
 import axios from 'axios'
+import { ConnectButton, useActiveAccount } from "thirdweb/react";
+
 import { sendTransaction, prepareContractCall } from 'thirdweb'
 import { createWallet } from 'thirdweb/wallets'
-import { client, contract } from '../client'
+import { client, contract } from '../../client'
 import { prepareEvent, getContractEvents } from 'thirdweb'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -13,7 +15,9 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { AlertCircle, Upload } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 
-export default function FileUpload({ Account }: { Account: any }) {
+export default function FileUpload() {
+  const Account = useActiveAccount();
+
   const [file, setFile] = useState<File | null>(null)
   const [fileName, setFileName] = useState('No image selected')
   const [isLoading, setIsLoading] = useState(false)
@@ -57,7 +61,8 @@ export default function FileUpload({ Account }: { Account: any }) {
         console.log(ImgHash)
 
         const wallet = createWallet('io.metamask')
-        const account = Account
+        const account = await wallet.connect({ client });
+
         const transaction = prepareContractCall({
           contract,
           method: 'function addContent(string memory contentHash)',
