@@ -12,6 +12,7 @@
 		"@types/mongodb": "^4.0.7",
 		"axios": "^1.7.7",
 		"mongodb": "^3.5.9",
+		"mongoose": "^8.8.1",
 		"next": "14.1.0",
 		"react": "^18.3",
 		"react-dom": "^18.3",

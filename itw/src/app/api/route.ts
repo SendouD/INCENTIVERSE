@@ -11,24 +11,25 @@ connectDB();
   if (req.method === 'POST') {
 
     const body=await req.json();
-    const { tokenId, userAddress, comment } = body;
-    if (!userAddress || !comment) {
-      return NextResponse.json({ message: 'Missing required fields: tokenId, userAddress, comment.' });
+    const { tokenId, userAddress, description } = body;
+    if (!userAddress) {
+      return NextResponse.json({ message: 'Missing required fields: tokenId, userAddress.' });
     }
 
     try {
-      const newComment = new Content({
+      const newContent = new Content({
         tokenId,
         userAddress,
-        comment,
+        description,
       });
-      console.log(newComment);
+
+      console.log(newContent);
 
       // Save the comment in MongoDB
-      const savedComment = await newComment.save();
-      console.log("saved comment", savedComment);
+      const savedConnent = await newContent.save();
+      console.log("saved comment", savedConnent);
 
-      return NextResponse.json({ message: 'Comment added successfully!', data: savedComment });
+      return NextResponse.json({ message: 'Comment added successfully!', data: savedConnent });
     } catch (error: any) {
       return NextResponse.json({ message: 'Error saving comment.', error: error.message });
     }

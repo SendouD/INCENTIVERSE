@@ -5,33 +5,52 @@ import {
   prepareContractCall,
 } from "thirdweb";
 import { createWallet } from "thirdweb/wallets";
-import {client,contract} from '../client';
-import { prepareEvent ,getContractEvents} from "thirdweb";
+import { client, contract } from '../client';
+import { prepareEvent, getContractEvents } from "thirdweb";
 
-const FileUpload = ({Account}: any) => {
+const FileUpload = ({ Account }: any) => {
   const [file, setFile] = useState<any>(null);
   const [fileName, setFileName] = useState("No image selected");
-//   const fetchEvents = async () => {
+  const [isLoading, setIsLoading] = useState(false); // Add loading state
+  const [event, setEvent] = useState<any[]>([]);
+  const [description, setDiscription] = useState<String>("");
 
-//   const myEvent = prepareEvent({
-//     signature: "event ContentAdded(uint256 indexed contentId, address indexed account, string contentHash)",
-//   });
-//   const latestBlock = await getBlockNumber(
-//     {
-//       network:""
-//     }
-//   )
 
-// const events = await getContractEvents({
-//   contract: contract,
-//   fromBlock: latestBlock-10n,
-//   toBlock: latestBlock,
-//   events: [myEvent],
-// });}
+
+
+
+
+
+  const fetchEvents = async () => {
+    const myEvent = prepareEvent({
+      signature: "event ContentAdded(uint256 indexed contentId, address indexed account, string contentHash)",
+    });
+    const events = await getContractEvents({
+      contract: contract,
+      events: [myEvent],
+    });
+    return events;
+  };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     if (file) {
       try {
+        setIsLoading(true); // Set loading to true when starting the transaction
+
         const formData = new FormData();
         formData.append("file", file);
 
@@ -49,7 +68,7 @@ const FileUpload = ({Account}: any) => {
         const ImgHash = resFile.data.IpfsHash;
         console.log(ImgHash);
 
-        const addimagehash = async() => {
+        const addimagehash = async () => {
           const wallet = createWallet("io.metamask");
           const account = Account;
           const transaction = prepareContractCall({
@@ -57,23 +76,52 @@ const FileUpload = ({Account}: any) => {
             method: "function addContent(string memory contentHash)",
             params: [ImgHash],
           });
-           
+
           const { transactionHash } = await sendTransaction({
             account,
             transaction,
           });
+
+          let events=await fetchEvents();
+          let n=events.length;
+          console.log(n);
+          let tokenId=Number(events[n-1].args.contentId);
+          console.log(tokenId);
+          let contentHash=events[n-1].args.contentHash;
+          console.log(contentHash);
+          let userAddress=events[n-1].args.account;
+
+          await axios.post('http://localhost:3000/api/', {
+            tokenId,
+            userAddress,
+            description,
+          });
+          console.log("Transaction Hash:", transactionHash);
         };
 
-        addimagehash();
+        await addimagehash();
+
         alert("Successfully uploaded image!");
         setFileName("No image selected");
         setFile(null);
       } catch (e) {
         console.error("Error uploading image to Pinata:", e);
         alert("Unable to upload image to Pinata");
+      } finally {
+        setIsLoading(false); // Reset loading state once the transaction is done
       }
     }
   };
+
+
+
+
+
+
+
+
+
+
 
   const retrieveFile = (e: any) => {
     const data = e.target.files[0];
@@ -82,6 +130,14 @@ const FileUpload = ({Account}: any) => {
       setFileName(data.name);
     }
   };
+
+
+
+
+
+
+
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 py-8">
@@ -98,13 +154,13 @@ const FileUpload = ({Account}: any) => {
             onChange={retrieveFile}
           />
           <span className="text-gray-600 text-center">{fileName}</span>
-          
+
           <button
             type="submit"
             className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 transition disabled:opacity-50"
-            disabled={!file}
+            disabled={!file || isLoading} // Disable button when loading or no file
           >
-            Upload File
+            {isLoading ? "Uploading..." : "Upload File"}
           </button>
         </form>
       </div>

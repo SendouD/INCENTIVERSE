@@ -4,7 +4,9 @@ import mongoose, { Schema, model } from 'mongoose';
 export interface IContent {
   tokenId: Number;
   userAddress: string; 
-  comment: string; 
+  description?: string; 
+  commentersAddress: string[]; 
+  comments: string[]; 
   timestamp: Date; 
 }
 
@@ -19,11 +21,20 @@ const contentSchema = new Schema<IContent>({
     required: true, // User address is mandatory
     match: /^0x[a-fA-F0-9]{40}$/, // Optional: Validate Ethereum address format
   },
-  comment: {
+  description: {
     type: String,
-    required: true, // Comment content is mandatory
-    maxlength: 500, // Limit comment length to 500 characters
+    required: false,
+    maxlength: 500, // Description length is limited to 500 characters
   },
+  commentersAddress: [{
+    type: String,
+    required: true, // Each commenter address is mandatory
+    match: /^0x[a-fA-F0-9]{40}$/, // Validate Ethereum address format
+  }],
+  comments: [{
+    type: String,
+    maxlength: 500, // Limit comment length to 500 characters
+  }],
   timestamp: {
     type: Date,
     default: Date.now, // Automatically set timestamp to current time
