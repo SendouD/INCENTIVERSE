@@ -1,22 +1,18 @@
 "use client";
 import { ConnectButton, useActiveAccount } from "thirdweb/react";
-import { client } from "./client";
-import { hardhat } from "thirdweb/chains";
-import Feed from "./pages/feed/page";
-import Header from "./Component/Header";
-
+import HomePage from "./Component/Homepage";
 
 export default function Home() {
 
   return (
     <main >
+      <HomePage />
+
           
           
 
-              <Header />    
 
 
-              {/* <Feed Account={Account} /> */}
     </main>
   );
 }
