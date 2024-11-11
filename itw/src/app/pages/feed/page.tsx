@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { prepareContractCall, sendTransaction } from 'thirdweb'
 import axios from 'axios'
 import { createWallet } from 'thirdweb/wallets'
@@ -14,9 +14,11 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { HeartIcon, MessageCircleIcon, ShareIcon } from 'lucide-react'
 
 interface Content {
+  contentID: number,
   address: string
   ipfsHash: string
   likes: number
+  dislikes: number
   comments: number
   shares: number
 }
@@ -34,27 +36,33 @@ export default function Feed() {
   const [loading, setLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)
   const address = useActiveAccount()?.address
+  const hasSorted = useRef<boolean>(false);
 
   const { data } = useReadContract({
     contract,
-    method: 'function getAllContent() view returns((address,string,uint256,uint256,uint256)[])',
+    method: 'function getAllContent() view returns((uint256,address,string,uint256,uint256,uint256,uint256)[])',
     params: [],
   })
 
   useEffect(() => {
     if (data) {
-      setContentList(
-        data.map((content: any) => ({
-          address: content[0],
-          ipfsHash: content[1],
-          likes: Number(content[2]),
-          comments: Number(content[3]),
-          shares: Number(content[4]),
-        }))
-      )
-      setLoading(false)
+      let formattedData = data.map((content: any) => ({
+        contentID: Number(content[0]),
+        address: content[1],
+        ipfsHash: content[2],
+        likes: Number(content[3]),
+        dislikes: Number(content[4]),
+        comments: Number(content[5]),
+        shares: Number(content[6]),
+      }));
+  
+      const sortedData = formattedData.sort((a, b) => (b.likes - numToDecimal(b.dislikes)) - (a.likes - numToDecimal(a.dislikes)))
+  
+      setContentList(sortedData);
+      setLoading(false);
+      hasSorted.current = true;
     }
-  }, [data])
+  }, [data]);
 
   // useEffect(() => {
   //   fetchComments()
@@ -70,6 +78,18 @@ export default function Feed() {
   //   }
   // }
 
+  function numToDecimal(num: number): number {
+    let temp: number = 0;
+
+    while(num > 0) {
+      temp += (num%10);
+      temp *= 0.1;
+      num = Math.floor(num / 10);
+    }
+    
+    return temp;
+  }
+
   const handleLike = async (contentID: number) => {
     try {
       const transaction = prepareContractCall({
@@ -84,7 +104,7 @@ export default function Feed() {
       // Optimistically update the UI
       setContentList((prev) =>
         prev.map((content, index) =>
-          index === contentID ? { ...content, likes: content.likes + 1 } : content
+          content.contentID === contentID ? { ...content, likes: content.likes + 1 } : content
         )
       )
     } catch (error) {
@@ -157,7 +177,7 @@ export default function Feed() {
             </CardContent>
             <CardFooter className="flex flex-col space-y-4">
               <div className="flex justify-between w-full">
-                <Button variant="ghost" size="sm" onClick={() => handleLike(index)}>
+                <Button variant="ghost" size="sm" onClick={() => handleLike(content.contentID)}>
                   <HeartIcon className="w-5 h-5 mr-2" />
                   Like
                 </Button>

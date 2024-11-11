@@ -14,9 +14,11 @@ contract Instadapp is Ownable {
     }
 
     struct Content {
+        uint256 contentID;
         address account;
         string contentHash;
         uint256 likes;
+        uint256 dislikes;
         uint256 comments;
         uint256 shares;
     }
@@ -44,9 +46,11 @@ contract Instadapp is Ownable {
     // Add new content
     function addContent(string memory contentHash) public {
           Content memory newcontent = Content({
+            contentID: count,
             contentHash: contentHash,
             account: msg.sender,
             likes: 0,
+            dislikes: 0,
             comments: 0,
             shares: 0
         });
