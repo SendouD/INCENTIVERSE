@@ -11,7 +11,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { HeartIcon, MessageCircleIcon, ShareIcon } from 'lucide-react'
+import { HeartCrackIcon, HeartIcon, MessageCircleIcon, ShareIcon } from 'lucide-react'
 
 interface Content {
   contentID: number,
@@ -113,6 +113,29 @@ export default function Feed() {
     }
   }
 
+  const handleDislike = async (contentID: number) => {
+    try {
+      const transaction = prepareContractCall({
+        contract,
+        method: 'function dislikeContent(uint256 contentId)',
+        params: [BigInt(contentID)],
+      })
+
+      const wallet = createWallet('io.metamask')
+      const account = await wallet.connect({ client });
+      await sendTransaction({ account, transaction })
+
+      setContentList((prev) =>
+        prev.map((content, index) =>
+          content.contentID === contentID ? { ...content, dislikes: content.dislikes + 1 } : content
+        )
+      )
+    } catch (error) {
+      console.error('Error liking content:', error)
+      setError('Failed to like content. Please try again.')
+    }
+  }
+
   const handleComment = async (contentID: number) => {
     try {
       await axios.patch(`http://localhost:3000/api/comments/${contentID}`, {
@@ -172,7 +195,7 @@ export default function Feed() {
               <div className="flex justify-between text-sm text-gray-500">
                 <span>{content.likes} likes</span>
                 <span>{content.comments} comments</span>
-                <span>{content.shares} shares</span>
+                <span>{content.dislikes} dislikes</span>
               </div>
             </CardContent>
             <CardFooter className="flex flex-col space-y-4">
@@ -185,9 +208,9 @@ export default function Feed() {
                   <MessageCircleIcon className="w-5 h-5 mr-2" />
                   Comment
                 </Button>
-                <Button variant="ghost" size="sm">
-                  <ShareIcon className="w-5 h-5 mr-2" />
-                  Share
+                <Button variant="ghost" size="sm" onClick={() => handleDislike(content.contentID)}>
+                  <HeartCrackIcon className="w-5 h-5 mr-2" />
+                  Dislike
                 </Button>
               </div>
               {/* <div className="w-full space-y-2">

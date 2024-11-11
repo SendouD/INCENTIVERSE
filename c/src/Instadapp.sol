@@ -25,6 +25,7 @@ contract Instadapp is Ownable {
 
     mapping(uint256 => Content) public contentdetails;
     mapping (uint256=>mapping(address=>bool)) private checklikes;
+    mapping (uint256=>mapping(address=>bool)) private checkdislikes;
     // Reward rates (in tokens) for each engagement
     uint256 public rewardPerLike = 1;    // 1 token per like
     uint256 public rewardPerComment = 2; // 2 tokens per comment
@@ -33,6 +34,7 @@ contract Instadapp is Ownable {
     // Events for content and engagement
     event ContentAdded(uint256 indexed contentId, address indexed account, string contentHash);
     event ContentLiked(uint256 indexed contentId, uint256 totalLikes);
+    event ContentDisliked(uint256 indexed contentId, uint256 totalDislikes);
     event ContentCommented(uint256 indexed contentId, uint256 totalComments);
     event ContentShared(uint256 indexed contentId, uint256 totalShares);
     event RewardRatesSet(uint256 likeReward, uint256 commentReward, uint256 shareReward);
@@ -73,6 +75,14 @@ contract Instadapp is Ownable {
 
         // Emit the event for likes update
         emit ContentLiked(contentId, content.likes);
+    }
+
+    function dislikeContent(uint256 contentId) public {
+        checkdislikes[contentId][msg.sender]=true;
+        Content storage content = contentdetails[contentId];
+        content.dislikes+=1;
+
+        emit ContentDisliked(contentId, content.dislikes);
     }
 
     // Function to comment on content and reward the creator
