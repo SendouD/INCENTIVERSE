@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { prepareContractCall, sendTransaction } from 'thirdweb'
 import axios from 'axios'
 import { createWallet } from 'thirdweb/wallets'
@@ -22,7 +22,6 @@ interface Content {
   comments: number
   shares: number
 }
-
 interface Comment {
   id: number
   text: string
@@ -31,12 +30,13 @@ interface Comment {
 
 export default function Feed() {
   const [contentList, setContentList] = useState<Content[]>([])
-  const [comments, setComments] = useState<{ [key: number]: Comment[] }>({})
   const [newComment, setNewComment] = useState<string>('')
   const [loading, setLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)
   const address = useActiveAccount()?.address
-  const hasSorted = useRef<boolean>(false);
+  const [dispComments, setDispComments] = useState<any[]>([])
+  const [commentatorAddress, setCommentatorAddress] = useState<string[]>([])
+  const [activeContentId, setActiveContentId] = useState<number | null>(null)
 
   const { data } = useReadContract({
     contract,
@@ -60,23 +60,21 @@ export default function Feed() {
   
       setContentList(sortedData);
       setLoading(false);
-      hasSorted.current = true;
     }
   }, [data]);
 
-  // useEffect(() => {
-  //   fetchComments()
-  // }, [])
-
-  // const fetchComments = async () => {
-  //   try {
-  //     const response = await axios.get('http://localhost:3000/api/comments')
-  //     setComments(response.data)
-  //   } catch (error) {
-  //     console.error('Error fetching comments:', error)
-  //     setError('Failed to load comments. Please try again later.')
-  //   }
-  // }
+  const fetchComments = async (contentId: number) => {
+    try {
+      const response = await axios.get(`http://localhost:3000/api/comments/${contentId}`)
+      console.log(response.data);
+      setDispComments(response.data.comments);
+      setCommentatorAddress(response.data.commentersAddress);
+      setActiveContentId(contentId);  // Set the current content ID for comment display
+    } catch (error) {
+      console.error('Error fetching comments:', error)
+      setError('Failed to load comments. Please try again later.')
+    }
+  }
 
   function numToDecimal(num: number): number {
     let temp: number = 0;
@@ -143,13 +141,16 @@ export default function Feed() {
         author: address,
       })
       // Optimistically update the UI
-      setComments((prev) => ({
-        ...prev,
-        [contentID]: [
-          ...(prev[contentID] || []),
-          { id: Date.now(), text: newComment, author: address || 'Anonymous' },
-        ],
-      }))
+      const transaction = prepareContractCall({
+        contract,
+        method: 'function commentContent(uint256 contentId)',
+        params: [BigInt(contentID)],
+      })
+
+      const wallet = createWallet('io.metamask')
+      const account = await wallet.connect({ client });
+      await sendTransaction({ account, transaction })
+  
       setNewComment('')
       // Update the comment count in the content list
       setContentList((prev) =>
@@ -204,7 +205,7 @@ export default function Feed() {
                   <HeartIcon className="w-5 h-5 mr-2" />
                   Like
                 </Button>
-                <Button variant="ghost" size="sm">
+                <Button variant="ghost" size="sm" onClick={() => fetchComments(content.contentID)}>
                   <MessageCircleIcon className="w-5 h-5 mr-2" />
                   Comment
                 </Button>
@@ -213,28 +214,31 @@ export default function Feed() {
                   Dislike
                 </Button>
               </div>
-              {/* <div className="w-full space-y-2">
-                {comments[index]?.map((comment) => (
-                  <div key={comment.id} className="flex items-start space-x-2">
-                    <Avatar className="w-8 h-8">
-                      <AvatarImage src={`https://avatar.vercel.sh/${comment.author}`} />
-                      <AvatarFallback>{comment.author.slice(0, 2)}</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 bg-gray-100 rounded-lg p-2">
-                      <p className="text-sm font-medium">{comment.author}</p>
-                      <p className="text-sm">{comment.text}</p>
+
+              {activeContentId === content.contentID && (
+                <div className="space-y-4">
+                  {dispComments.map((comment, idx) => (
+                    <div key={idx} className="flex items-start space-x-2">
+                      <Avatar>
+                        <AvatarImage src={`https://avatar.vercel.sh/${commentatorAddress[idx]}`} />
+                        <AvatarFallback>{commentatorAddress[idx].slice(0, 2)}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex flex-col">
+                        <p className="text-sm font-medium">{commentatorAddress[idx]}</p>
+                        <p className="text-sm">{comment}</p>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div> */}
+                  ))}
+                </div>
+              )}
+           
               <div className="flex w-full space-x-2">
                 <Input
                   placeholder="Add a comment..."
-                  value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
                   className="flex-1"
                 />
-                <Button onClick={() => handleComment(index)}>Post</Button>
+                <Button onClick={() => handleComment(content.contentID)}>Post</Button>
               </div>
             </CardFooter>
           </Card>

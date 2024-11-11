@@ -33,6 +33,7 @@ export default function FileUpload() {
       contract: contract,
       events: [myEvent],
     })
+    console.log(events);
     return events
   }
 
@@ -76,6 +77,8 @@ export default function FileUpload() {
 
         let events = await fetchEvents()
         let n = events.length
+        console.log(n);
+        console.log(events);
         let tokenId = Number(events[n - 1].args.contentId)
         let contentHash = events[n - 1].args.contentHash
         let userAddress = events[n - 1].args.account
