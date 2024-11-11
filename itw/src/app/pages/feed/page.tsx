@@ -37,6 +37,7 @@ export default function Feed() {
   const [dispComments, setDispComments] = useState<any[]>([])
   const [commentatorAddress, setCommentatorAddress] = useState<string[]>([])
   const [activeContentId, setActiveContentId] = useState<number | null>(null)
+  const [nonce, setNonce] = useState<number>(0)
 
   const { data } = useReadContract({
     contract,
@@ -73,6 +74,7 @@ export default function Feed() {
     } catch (error) {
       console.error('Error fetching comments:', error)
       setError('Failed to load comments. Please try again later.')
+      setNonce(nonce => nonce + 1);
     }
   }
 
@@ -99,7 +101,7 @@ export default function Feed() {
       const wallet = createWallet('io.metamask')
       const account = await wallet.connect({ client });
       await sendTransaction({ account, transaction })
-      // Optimistically update the UI
+      
       setContentList((prev) =>
         prev.map((content, index) =>
           content.contentID === contentID ? { ...content, likes: content.likes + 1 } : content
@@ -107,7 +109,8 @@ export default function Feed() {
       )
     } catch (error) {
       console.error('Error liking content:', error)
-      setError('Failed to like content. Please try again.')
+      setError('You already liked the post!')
+      setNonce(nonce => nonce + 1);
     }
   }
 
@@ -130,7 +133,8 @@ export default function Feed() {
       )
     } catch (error) {
       console.error('Error liking content:', error)
-      setError('Failed to like content. Please try again.')
+      setError('You already disliked the post!')
+      setNonce(nonce => nonce + 1);
     }
   }
 
@@ -161,15 +165,12 @@ export default function Feed() {
     } catch (error) {
       console.error('Error adding comment:', error)
       setError('Failed to add comment. Please try again.')
+      setNonce(nonce => nonce + 1);
     }
   }
 
   if (loading) {
     return <div className="text-center py-10">Loading...</div>
-  }
-
-  if (error) {
-    return <div className="text-center py-10 text-red-500">{error}</div>
   }
 
   return (
@@ -244,6 +245,15 @@ export default function Feed() {
           </Card>
         ))}
       </div>
+      {
+        error &&
+        <div
+          key={error+nonce}
+          className="fixed min-w-[100px] py-4 px-4 text-red-600 rounded-xl border bg-card text-card-foreground shadow opacity-0 animate-fade-in-out"
+        >
+          {error}
+        </div>
+      }
     </div>
   )
 }
