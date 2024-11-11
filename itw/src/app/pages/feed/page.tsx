@@ -29,11 +29,13 @@ interface Comment {
 
 export default function Feed() {
   const [contentList, setContentList] = useState<Content[]>([])
-  const [comments, setComments] = useState<{ [key: number]: Comment[] }>({})
   const [newComment, setNewComment] = useState<string>('')
   const [loading, setLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)
   const address = useActiveAccount()?.address
+  const [dispcomments,setDispComments]=useState<any>([])
+  const[commentatoraddress,setCommentatorAddress]=useState<any>([]);
+  
 
   const { data } = useReadContract({
     contract,
@@ -60,15 +62,17 @@ export default function Feed() {
   //   fetchComments()
   // }, [])
 
-  // const fetchComments = async () => {
-  //   try {
-  //     const response = await axios.get('http://localhost:3000/api/comments')
-  //     setComments(response.data)
-  //   } catch (error) {
-  //     console.error('Error fetching comments:', error)
-  //     setError('Failed to load comments. Please try again later.')
-  //   }
-  // }
+  const fetchComments = async (contentId: number) => {
+    try {
+      const response = await axios.get(`http://localhost:3000/api/comments/${contentId}`)
+      console.log(response.data);
+      setDispComments(response.data.comments);
+      setCommentatorAddress(response.data.commentersAddress);
+    } catch (error) {
+      console.error('Error fetching comments:', error)
+      setError('Failed to load comments. Please try again later.')
+    }
+  }
 
   const handleLike = async (contentID: number) => {
     try {
@@ -161,7 +165,7 @@ export default function Feed() {
                   <HeartIcon className="w-5 h-5 mr-2" />
                   Like
                 </Button>
-                <Button variant="ghost" size="sm">
+                <Button variant="ghost" size="sm" onClick={() => fetchComments(index)}>
                   <MessageCircleIcon className="w-5 h-5 mr-2" />
                   Comment
                 </Button>
@@ -170,20 +174,7 @@ export default function Feed() {
                   Share
                 </Button>
               </div>
-              {/* <div className="w-full space-y-2">
-                {comments[index]?.map((comment) => (
-                  <div key={comment.id} className="flex items-start space-x-2">
-                    <Avatar className="w-8 h-8">
-                      <AvatarImage src={`https://avatar.vercel.sh/${comment.author}`} />
-                      <AvatarFallback>{comment.author.slice(0, 2)}</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 bg-gray-100 rounded-lg p-2">
-                      <p className="text-sm font-medium">{comment.author}</p>
-                      <p className="text-sm">{comment.text}</p>
-                    </div>
-                  </div>
-                ))}
-              </div> */}
+           
               <div className="flex w-full space-x-2">
                 <Input
                   placeholder="Add a comment..."
