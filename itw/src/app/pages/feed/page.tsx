@@ -41,34 +41,20 @@ export default function Feed() {
     params: [],
   })
 
-  useEffect(() => {
-    if (data) {
-      setContentList(
-        data.map((content: any) => ({
-          address: content[0],
-          ipfsHash: content[1],
-          likes: Number(content[2]),
-          comments: Number(content[3]),
-          shares: Number(content[4]),
-        }))
-      )
-      setLoading(false)
-    }
-  }, [data])
-
   // useEffect(() => {
-  //   fetchComments()
-  // }, [])
-
-  // const fetchComments = async () => {
-  //   try {
-  //     const response = await axios.get('http://localhost:3000/api/comments')
-  //     setComments(response.data)
-  //   } catch (error) {
-  //     console.error('Error fetching comments:', error)
-  //     setError('Failed to load comments. Please try again later.')
+  //   if (data) {
+  //     setContentList(
+  //       data.map((content: any) => ({
+  //         address: content[0],
+  //         ipfsHash: content[1],
+  //         likes: Number(content[2]),
+  //         comments: Number(content[3]),
+  //         shares: Number(content[4]),
+  //       }))
+  //     )
+  //     setLoading(false)
   //   }
-  // }
+  // }, [data])
 
   const handleLike = async (contentID: number) => {
     try {
@@ -130,7 +116,7 @@ export default function Feed() {
 
   return (
     <div className="min-h-screen bg-gray-100 py-8 px-4 sm:px-6 lg:px-8">
-      <h2 className="text-3xl font-bold text-center text-gray-800 mb-8">Social Feed</h2>
+    <h2 className="text-3xl font-bold text-center text-gray-800 mb-8">Social Feed</h2>
       <div className="max-w-3xl mx-auto space-y-6">
         {contentList.map((content, index) => (
           <Card key={index} className="w-full">
@@ -170,20 +156,6 @@ export default function Feed() {
                   Share
                 </Button>
               </div>
-              {/* <div className="w-full space-y-2">
-                {comments[index]?.map((comment) => (
-                  <div key={comment.id} className="flex items-start space-x-2">
-                    <Avatar className="w-8 h-8">
-                      <AvatarImage src={`https://avatar.vercel.sh/${comment.author}`} />
-                      <AvatarFallback>{comment.author.slice(0, 2)}</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 bg-gray-100 rounded-lg p-2">
-                      <p className="text-sm font-medium">{comment.author}</p>
-                      <p className="text-sm">{comment.text}</p>
-                    </div>
-                  </div>
-                ))}
-              </div> */}
               <div className="flex w-full space-x-2">
                 <Input
                   placeholder="Add a comment..."
