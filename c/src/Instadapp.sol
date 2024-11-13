@@ -43,6 +43,7 @@ contract Instadapp is Ownable {
 
     modifier checkrewardsprovided(uint256 contentId){
         require(checklikes[contentId][msg.sender]==false,"you already liked");
+        require(checkdislikes[contentId][msg.sender]==false,"you already disliked");
         _;
     }
 
@@ -85,7 +86,7 @@ contract Instadapp is Ownable {
         emit ContentLiked(contentId, content.likes);
     }
 
-    function dislikeContent(uint256 contentId) public {
+    function dislikeContent(uint256 contentId) checkrewardsprovided(contentId) public {
         checkdislikes[contentId][msg.sender]=true;
         Content storage content = contentdetails[contentId];
         content.dislikes+=1;
