@@ -71,12 +71,13 @@ export default function Feed() {
 
   const fetchDescription = async () => {
     try {
-      const response = await axios.get(`http://localhost:3000/api/description/`)
+      const response = await axios.get(`http://localhost:3001/api/description/`)
       const desc = response.data.description;
       let temp = [];
       for(let i=0; i<desc.length; i++) {
         temp[desc[i].tokenId] = desc[i].description; 
       }
+      console.log(temp);
       setDescription(temp);
     } catch (error) {
       console.error('Error fetching description:', error)
@@ -86,7 +87,7 @@ export default function Feed() {
 
   const fetchComments = async (contentId: number) => {
     try {
-      const response = await axios.get(`http://localhost:3000/api/comments/${contentId}`)
+      const response = await axios.get(`http://localhost:3001/api/comments/${contentId}`)
       console.log(response.data);
       setDispComments(response.data.comments);
       setCommentatorAddress(response.data.commentersAddress);
@@ -128,6 +129,8 @@ export default function Feed() {
         )
       )
     } catch (error) {
+      console.log("hitt");
+
       console.error('Error liking content:', error)
       setError('You already liked the post!')
       setNonce(nonce => nonce + 1);
@@ -160,7 +163,7 @@ export default function Feed() {
 
   const handleComment = async (contentID: number) => {
     try {
-      await axios.patch(`http://localhost:3000/api/comments/${contentID}`, {
+      await axios.patch(`http://localhost:3001/api/comments/${contentID}`, {
         text: newComment,
         author: address,
       })
@@ -283,7 +286,7 @@ export default function Feed() {
         error &&
         <div
           key={error+nonce}
-          className="fixed min-w-[100px] py-4 px-4 text-red-600 rounded-xl border bg-card text-card-foreground shadow opacity-0 animate-fade-in-out"
+          className='text-center py-10 text-red-500'
         >
           {error}
         </div>

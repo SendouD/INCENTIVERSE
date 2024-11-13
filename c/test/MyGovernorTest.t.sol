@@ -54,25 +54,22 @@ contract MyGovernorTest is Test {
 
     function testCantUpdateBoxWithoutGovernance() public {
         vm.expectRevert();
-        instadapp.setRewardRates(4, 5, 6);
+        instadapp.setRewardRates(4, 5);
     }
 
     function testGovernanceUpdatesBox() public {
+        
     uint256  rewardPerLike = 4;   
    uint256  rewardPerComment = 5; 
-    uint256  rewardPerShare = 6;
 
         string memory description = "I want more likes rewards" ;
-        bytes memory encodedFunctionCall = abi.encodeWithSignature("setRewardRates(uint256,uint256,uint256)",rewardPerLike,rewardPerComment,rewardPerShare);
+        bytes memory encodedFunctionCall = abi.encodeWithSignature("setRewardRates(uint256,uint256)",rewardPerLike,rewardPerComment);
         addressesToCall.push(address(instadapp));
         values.push(0);
         functionCalls.push(encodedFunctionCall);
-        // 1. Propose to the DAO
         uint256 proposalId = governor.propose(addressesToCall, values, functionCalls, description);
 
         console.log("Proposal State:", uint256(governor.state(proposalId)));
-        // governor.proposalSnapshot(proposalId)
-        // governor.proposalDeadline(proposalId)
 
         vm.warp(block.timestamp + VOTING_DELAY + 1);
         vm.roll(block.number + VOTING_DELAY + 1);
@@ -81,7 +78,6 @@ contract MyGovernorTest is Test {
 
         // 2. Vote
         string memory reason = "I too want more rewards a do da cha cha";
-        // 0 = Against, 1 = For, 2 = Abstain for this example
         uint8 voteWay = 1;
         vm.prank(VOTER);
         governor.castVoteWithReason(proposalId, voteWay, reason);
@@ -105,7 +101,6 @@ contract MyGovernorTest is Test {
         console.log("Test setup completed");
         console.log(instadapp.rewardPerLike());
         console.log(instadapp.rewardPerComment());
-        console.log(instadapp.rewardPerShare());
 
         assert(instadapp.rewardPerLike() == rewardPerLike);
     }

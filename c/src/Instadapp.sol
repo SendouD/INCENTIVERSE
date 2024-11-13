@@ -30,7 +30,6 @@ contract Instadapp is Ownable {
     // Reward rates (in tokens) for each engagement
     uint256 public rewardPerLike = 1;    // 1 token per like
     uint256 public rewardPerComment = 2; // 2 tokens per comment
-    uint256 public rewardPerShare = 3;   // 3 tokens per share
 
     // Events for content and engagement
     event ContentAdded(uint256 indexed contentId, address indexed account, string contentHash);
@@ -38,7 +37,7 @@ contract Instadapp is Ownable {
     event ContentDisliked(uint256 indexed contentId, uint256 totalDislikes);
     event ContentCommented(uint256 indexed contentId, uint256 totalComments);
     event ContentShared(uint256 indexed contentId, uint256 totalShares);
-    event RewardRatesSet(uint256 likeReward, uint256 commentReward, uint256 shareReward);
+    event RewardRatesSet(uint256 likeReward, uint256 commentReward);
 
 
     modifier checkrewardsprovided(uint256 contentId){
@@ -114,17 +113,6 @@ contract Instadapp is Ownable {
         return allContent;
     }
 
-    // Function to share content and reward the creator
-    function shareContent(uint256 contentId) public {
-        Content storage content = contentdetails[contentId];
-        content.shares += 1;
-
-        // Reward the content creator
-        _rewardCreator(content.account, rewardPerShare);
-
-        // Emit the event for shares update
-        emit ContentShared(contentId, content.shares);
-    }
 
     // Internal function to reward the creator with tokens
     function _rewardCreator(address creator, uint256 rewardAmount) internal {
@@ -132,11 +120,10 @@ contract Instadapp is Ownable {
     }
 
     // This function now allows the governor contract to set reward rates
-    function setRewardRates(uint256 _likeReward, uint256 _commentReward, uint256 _shareReward) public onlyOwner {
+    function setRewardRates(uint256 _likeReward, uint256 _commentReward) public onlyOwner {
         rewardPerLike = _likeReward;
         rewardPerComment = _commentReward;
-        rewardPerShare = _shareReward;
-        emit RewardRatesSet(_likeReward, _commentReward, _shareReward);
+        emit RewardRatesSet(_likeReward, _commentReward);
     }
         function getrewardPerLike() external view returns (uint256) {
         return rewardPerLike;
