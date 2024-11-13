@@ -4,6 +4,7 @@ pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./Instken.sol";
+import {console} from "forge-std/console.sol";
 
 contract Instadapp is Ownable {
     uint256 private count = 0;
@@ -63,6 +64,12 @@ contract Instadapp is Ownable {
 
         count++; // Increment the count for the next content
     }
+      function tokenbalance() public view  returns(uint256){
+        console.log(msg.sender);
+        console.log("token balance",tokenContract.balanceOf(msg.sender));
+        return tokenContract.balanceOf(msg.sender);
+
+    }
 
     // Function to like content and reward the creator
     function likeContent(uint256 contentId) checkrewardsprovided(contentId) public {
@@ -71,6 +78,7 @@ contract Instadapp is Ownable {
         content.likes+=1;
 
         // Reward the content creator
+        console.log(content.account);
         _rewardCreator(content.account, rewardPerLike);
 
         // Emit the event for likes update

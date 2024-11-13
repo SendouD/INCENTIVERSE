@@ -114,66 +114,79 @@ export default function FileUpload() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 py-8 px-4">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-2xl font-bold text-center">Share Your Moment</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <label htmlFor="file-upload" className="block text-sm font-medium text-gray-700">
-                Choose an image
-              </label>
-              <div className="flex items-center justify-center w-full">
-                <label
-                  htmlFor="file-upload"
-                  className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100"
-                >
-                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                    {previewUrl ? (
-                      <img src={previewUrl} alt="Preview" className="w-full h-full object-cover rounded-lg" />
-                    ) : (
-                      <>
-                        <Upload className="w-8 h-8 mb-4 text-gray-500" />
-                        <p className="mb-2 text-sm text-gray-500">
-                          <span className="font-semibold">Click to upload</span> or drag and drop
-                        </p>
-                        <p className="text-xs text-gray-500">{fileName}</p>
-                      </>
-                    )}
-                  </div>
-                  <Input id="file-upload" type="file" className="hidden" onChange={retrieveFile} accept="image/*" />
+    <div className="min-h-screen relative">
+      <div 
+        className="absolute inset-0 z-0"
+        style={{
+          backgroundImage: "url('/background.avif')",
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundAttachment: 'fixed',
+          filter: 'grayscale(100%) brightness(40%)'
+        }}
+      />
+      <div className="relative z-10 flex items-center justify-center py-8 px-4">
+        <Card className="w-full max-w-md bg-white bg-opacity-90 backdrop-blur-sm">
+          <CardHeader>
+            <CardTitle className="text-2xl font-bold text-center text-gray-800">Share Your Moment</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <label htmlFor="file-upload" className="block text-sm font-medium text-gray-800">
+                  Choose an image
                 </label>
+                <div className="flex items-center justify-center w-full">
+                  <label
+                    htmlFor="file-upload"
+                    className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100"
+                  >
+                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                      {previewUrl ? (
+                        <img src={previewUrl} alt="Preview" className="w-full h-full object-cover rounded-lg" />
+                      ) : (
+                        <>
+                          <Upload className="w-8 h-8 mb-4 text-gray-600" />
+                          <p className="mb-2 text-sm text-gray-600">
+                            <span className="font-semibold">Click to upload</span> or drag and drop
+                          </p>
+                          <p className="text-xs text-gray-600">{fileName}</p>
+                        </>
+                      )}
+                    </div>
+                    <Input id="file-upload" type="file" className="hidden" onChange={retrieveFile} accept="image/*" />
+                  </label>
+                </div>
               </div>
-            </div>
-            <div className="space-y-2">
-              <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-                Description
-              </label>
-              <Textarea
-                id="description"
-                placeholder="Write a caption for your image..."
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                rows={3}
-              />
-            </div>
-          </form>
-        </CardContent>
-        <CardFooter>
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={!file || isLoading}
-            onClick={handleSubmit}
-          >
-            {isLoading ? 'Uploading...' : 'Share'}
-          </Button>
-        </CardFooter>
-      </Card>
+              <div className="space-y-2">
+                <label htmlFor="description" className="block text-sm font-medium text-gray-800">
+                  Description
+                </label>
+                <Textarea
+                  id="description"
+                  placeholder="Write a caption for your image..."
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  rows={3}
+                  className="bg-white bg-opacity-90"
+                />
+              </div>
+            </form>
+          </CardContent>
+          <CardFooter>
+            <Button
+              type="submit"
+              className="w-full bg-gray-800 text-white hover:bg-gray-700"
+              disabled={!file || isLoading}
+              onClick={handleSubmit}
+            >
+              {isLoading ? 'Uploading...' : 'Share'}
+            </Button>
+          </CardFooter>
+        </Card>
+      </div>
       {error && (
-        <Alert variant="destructive" className="mt-4">
+        <Alert variant="destructive" className="mt-4 absolute bottom-4 left-4 right-4 bg-red-500 text-white">
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Error</AlertTitle>
           <AlertDescription>{error}</AlertDescription>

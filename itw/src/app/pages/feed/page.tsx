@@ -36,7 +36,8 @@ export default function Feed() {
   const address = useActiveAccount()?.address
   const [dispComments, setDispComments] = useState<any[]>([])
   const [commentatorAddress, setCommentatorAddress] = useState<string[]>([])
-  const [activeContentId, setActiveContentId] = useState<number | null>(null)
+  const [activeContentId, setActiveContentId] = useState<number | null>(null);
+  const [description, setDescription] = useState<any[]>([]);
 
   const { data } = useReadContract({
     contract,
@@ -62,6 +63,25 @@ export default function Feed() {
       setLoading(false);
     }
   }, [data]);
+
+  useEffect(() => {
+    fetchDescription();  
+  },[]);
+
+  const fetchDescription = async () => {
+    try {
+      const response = await axios.get(`http://localhost:3000/api/description/`)
+      const desc = response.data.description;
+      let temp = [];
+      for(let i=0; i<desc.length; i++) {
+        temp[desc[i].tokenId] = desc[i].description; 
+      }
+      setDescription(temp);
+    } catch (error) {
+      console.error('Error fetching description:', error)
+      setError('Failed to load description. Please try again later.')
+    }
+  }
 
   const fetchComments = async (contentId: number) => {
     try {
@@ -101,7 +121,7 @@ export default function Feed() {
       await sendTransaction({ account, transaction })
       // Optimistically update the UI
       setContentList((prev) =>
-        prev.map((content, index) =>
+        prev.map((content) =>
           content.contentID === contentID ? { ...content, likes: content.likes + 1 } : content
         )
       )
@@ -124,13 +144,13 @@ export default function Feed() {
       await sendTransaction({ account, transaction })
 
       setContentList((prev) =>
-        prev.map((content, index) =>
+        prev.map((content) =>
           content.contentID === contentID ? { ...content, dislikes: content.dislikes + 1 } : content
         )
       )
     } catch (error) {
-      console.error('Error liking content:', error)
-      setError('Failed to like content. Please try again.')
+      console.error('Error disliking content:', error)
+      setError('Failed to dislike content. Please try again.')
     }
   }
 
@@ -154,8 +174,8 @@ export default function Feed() {
       setNewComment('')
       // Update the comment count in the content list
       setContentList((prev) =>
-        prev.map((content, index) =>
-          index === contentID ? { ...content, comments: content.comments + 1 } : content
+        prev.map((content) =>
+          content.contentID === contentID ? { ...content, comments: content.comments + 1 } : content
         )
       )
     } catch (error) {
@@ -173,76 +193,90 @@ export default function Feed() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 py-8 px-4 sm:px-6 lg:px-8">
-      <h2 className="text-3xl font-bold text-center text-gray-800 mb-8">Social Feed</h2>
-      <div className="max-w-3xl mx-auto space-y-6">
-        {contentList.map((content, index) => (
-          <Card key={index} className="w-full">
-            <CardHeader>
-              <div className="flex items-center space-x-4">
-                <Avatar>
-                  <AvatarImage src={`https://avatar.vercel.sh/${content.address}`} />
-                  <AvatarFallback>{content.address.slice(0, 2)}</AvatarFallback>
-                </Avatar>
-                <CardTitle className="text-sm font-medium">{content.address}</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <img
-                src={`https://gateway.pinata.cloud/ipfs/${content.ipfsHash}`}
-                alt={`Content from IPFS ${index}`}
-                className="w-full h-64 object-cover rounded-md mb-4"
-              />
-              <div className="flex justify-between text-sm text-gray-500">
-                <span>{content.likes} likes</span>
-                <span>{content.comments} comments</span>
-                <span>{content.dislikes} dislikes</span>
-              </div>
-            </CardContent>
-            <CardFooter className="flex flex-col space-y-4">
-              <div className="flex justify-between w-full">
-                <Button variant="ghost" size="sm" onClick={() => handleLike(content.contentID)}>
-                  <HeartIcon className="w-5 h-5 mr-2" />
-                  Like
-                </Button>
-                <Button variant="ghost" size="sm" onClick={() => fetchComments(content.contentID)}>
-                  <MessageCircleIcon className="w-5 h-5 mr-2" />
-                  Comment
-                </Button>
-                <Button variant="ghost" size="sm" onClick={() => handleDislike(content.contentID)}>
-                  <HeartCrackIcon className="w-5 h-5 mr-2" />
-                  Dislike
-                </Button>
-              </div>
-
-              {activeContentId === content.contentID && (
-                <div className="space-y-4">
-                  {dispComments.map((comment, idx) => (
-                    <div key={idx} className="flex items-start space-x-2">
-                      <Avatar>
-                        <AvatarImage src={`https://avatar.vercel.sh/${commentatorAddress[idx]}`} />
-                        <AvatarFallback>{commentatorAddress[idx].slice(0, 2)}</AvatarFallback>
-                      </Avatar>
-                      <div className="flex flex-col">
-                        <p className="text-sm font-medium">{commentatorAddress[idx]}</p>
-                        <p className="text-sm">{comment}</p>
-                      </div>
-                    </div>
-                  ))}
+    <div className="min-h-screen relative">
+      <div 
+        className="absolute inset-0 z-0"
+        style={{
+          backgroundImage: "url('/background.avif')",
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundAttachment: 'fixed',
+          filter: 'grayscale(100%) brightness(40%)'
+        }}
+      />
+      <div className="relative z-10 py-8 px-4 sm:px-6 lg:px-8">
+        <h2 className="text-3xl font-bold text-center text-white mb-8">Social Feed</h2>
+        <div className="max-w-3xl mx-auto space-y-6">
+          {contentList.map((content, index) => (
+            <Card key={index} className="w-full bg-white bg-opacity-10 backdrop-blur-md">
+              <CardHeader>
+                <div className="flex items-center space-x-4">
+                  <Avatar>
+                    <AvatarImage src={`https://avatar.vercel.sh/${content.address}`} />
+                    <AvatarFallback>{content.address.slice(0, 2)}</AvatarFallback>
+                  </Avatar>
+                  <CardTitle className="text-sm font-medium text-white">{content.address}</CardTitle>
                 </div>
-              )}
-           
-              <div className="flex w-full space-x-2">
-                <Input
-                  placeholder="Add a comment..."
-                  onChange={(e) => setNewComment(e.target.value)}
-                  className="flex-1"
+              </CardHeader>
+              <CardContent>
+                <img
+                  src={`https://gateway.pinata.cloud/ipfs/${content.ipfsHash}`}
+                  alt={`Content from IPFS ${index}`}
+                  className="w-full h-64 object-cover rounded-md mb-4"
                 />
-                <Button onClick={() => handleComment(content.contentID)}>Post</Button>
-              </div>
-            </CardFooter>
-          </Card>
-        ))}
+                <p className="text-white mb-2">{description[content.contentID]}</p>
+                <div className="flex justify-between text-sm text-gray-300">
+                  <span>{content.likes} likes</span>
+                  <span>{content.comments} comments</span>
+                  <span>{content.dislikes} dislikes</span>
+                </div>
+              </CardContent>
+              <CardFooter className="flex flex-col space-y-4">
+                <div className="flex justify-between w-full">
+                  <Button variant="ghost" size="sm" onClick={() => handleLike(content.contentID)} className="text-white hover:text-gray-200">
+                    <HeartIcon className="w-5 h-5 mr-2" />
+                    Like
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => fetchComments(content.contentID)} className="text-white hover:text-gray-200">
+                    <MessageCircleIcon className="w-5 h-5 mr-2" />
+                    Comment
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => handleDislike(content.contentID)} className="text-white hover:text-gray-200">
+                    <HeartCrackIcon className="w-5 h-5 mr-2" />
+                    Dislike
+                  </Button>
+                </div>
+
+                {activeContentId === content.contentID && (
+                  <div className="space-y-4">
+                    {dispComments.map((comment, idx) => (
+                      <div key={idx} className="flex items-start space-x-2">
+                        <Avatar>
+                          <AvatarImage src={`https://avatar.vercel.sh/${commentatorAddress[idx]}`} />
+                          <AvatarFallback>{commentatorAddress[idx].slice(0, 2)}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex flex-col">
+                          <p className="text-sm font-medium text-white">{commentatorAddress[idx]}</p>
+                          <p className="text-sm text-gray-300">{comment}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+             
+                <div className="flex w-full space-x-2">
+                  <Input
+                    placeholder="Add a comment..."
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    className="flex-1 bg-white bg-opacity-10 text-white placeholder-gray-400"
+                  />
+                  <Button onClick={() => handleComment(content.contentID)} className="bg-white text-black hover:bg-gray-200">Post</Button>
+                </div>
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
       </div>
     </div>
   )
