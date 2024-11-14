@@ -13,9 +13,9 @@ if(req.method === 'GET'){
     try {
       const content = await Content.find({},{tokenId:1,description:1});
   
-      // if (!content) {
-      //   return NextResponse.json({ message: 'Content not found.' }, { status: 404 });
-      // }
+      if (!content) {
+        return NextResponse.json({ message: 'Content not found.' }, { status: 404 });
+      }
       if(content){
         return NextResponse.json({ description:content}, { status: 200 });
       }

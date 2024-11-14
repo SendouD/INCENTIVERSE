@@ -31,19 +31,8 @@ contract Counter is Script {
 
     function run() public {
         vm.startBroadcast();
-        instadapp = new Instadapp();
-        token = new GovToken();
-        timelock = new TimeLock(MIN_DELAY, proposers, executors);
-        governor = new MyGovernor(token, timelock);
-        bytes32 proposerRole = timelock.PROPOSER_ROLE();
-        bytes32 executorRole = timelock.EXECUTOR_ROLE();
-        bytes32 adminRole = timelock.TIMELOCK_ADMIN_ROLE();
-        timelock.grantRole(proposerRole, address(governor));
-        timelock.grantRole(executorRole, address(0));
-        timelock.grantRole(executorRole, address(governor));
-        timelock.revokeRole(adminRole, msg.sender);
+        
         instadapp=new Instadapp();
-        instadapp.transferOwnership(address(timelock));
 
         vm.stopBroadcast();
     }

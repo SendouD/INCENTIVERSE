@@ -77,6 +77,7 @@ export default function Feed() {
       for(let i=0; i<desc.length; i++) {
         temp[desc[i].tokenId] = desc[i].description; 
       }
+      console.log(temp)
       setDescription(temp);
     } catch (error) {
       console.error('Error fetching description:', error)
@@ -129,7 +130,7 @@ export default function Feed() {
       )
     } catch (error) {
       console.error('Error liking content:', error)
-      setError('You already liked the post!')
+      setError('You already liked or disliked the post!')
       setNonce(nonce => nonce + 1);
     }
   }
@@ -153,17 +154,14 @@ export default function Feed() {
       )
     } catch (error) {
       console.error('Error liking content:', error)
-      setError('You already disliked the post!')
+      setError('You already liked or disliked the post!')
       setNonce(nonce => nonce + 1);
     }
   }
 
   const handleComment = async (contentID: number) => {
     try {
-      await axios.patch(`http://localhost:3000/api/comments/${contentID}`, {
-        text: newComment,
-        author: address,
-      })
+    
       // Optimistically update the UI
       const transaction = prepareContractCall({
         contract,
@@ -174,6 +172,10 @@ export default function Feed() {
       const wallet = createWallet('io.metamask')
       const account = await wallet.connect({ client });
       await sendTransaction({ account, transaction })
+      await axios.patch(`http://localhost:3000/api/comments/${contentID}`, {
+        text: newComment,
+        author: address,
+      })
   
       setNewComment('')
       // Update the comment count in the content list
@@ -268,7 +270,6 @@ export default function Feed() {
                 <div className="flex w-full space-x-2">
                   <Input
                     placeholder="Add a comment..."
-                    value={newComment}
                     onChange={(e) => setNewComment(e.target.value)}
                     className="flex-1 bg-white bg-opacity-10 text-white placeholder-gray-400"
                   />

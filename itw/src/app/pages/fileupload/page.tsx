@@ -1,8 +1,8 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import axios from 'axios'
-import { ConnectButton, useActiveAccount } from "thirdweb/react";
+import { ConnectButton, useActiveAccount ,useReadContract} from "thirdweb/react";
 
 import { sendTransaction, prepareContractCall } from 'thirdweb'
 import { createWallet } from 'thirdweb/wallets'
@@ -14,9 +14,13 @@ import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { AlertCircle, Upload } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { readContract } from "thirdweb";
+import { set } from 'mongoose';
+
 
 export default function FileUpload() {
   const Account = useActiveAccount();
+
 
   const [file, setFile] = useState<File | null>(null)
   const [fileName, setFileName] = useState('No image selected')
@@ -24,20 +28,36 @@ export default function FileUpload() {
   const [description, setDescription] = useState('')
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [contId,setContId]=useState(0);
+  const address = useActiveAccount()?.address
 
-  const fetchEvents = async () => {
-    const myEvent = prepareEvent({
-      signature: 'event ContentAdded(uint256 indexed contentId, address indexed account, string contentHash)',
-    })
-    const events = await getContractEvents({
-      contract: contract,
-      events: [myEvent],
-    })
-    console.log(events);
-    return events
-  }
+
+  const { data } = useReadContract({
+    contract,
+    method: "function count() view returns (uint256)",
+    params: [],
+  })
+
+
+  useEffect(() => {setContId(Number(data)); }, [data]);
+
+
+  // const fetchEvents = async () => {
+  //   const myEvent = prepareEvent({
+  //     signature: 'event ContentAdded(uint256 indexed contentId, address indexed account, string contentHash)',
+  //   })
+  //   const events = await getContractEvents({
+  //     contract: contract,
+  //     events: [myEvent],
+  //   })
+  //   console.log(events);
+  //   return events
+  // }
+  
+
 
   const handleSubmit = async (e: React.FormEvent) => {
+
     e.preventDefault()
     if (file) {
       try {
@@ -70,18 +90,18 @@ export default function FileUpload() {
           params: [ImgHash],
         })
 
-        const { transactionHash } = await sendTransaction({
+        const  transactionHash  = await sendTransaction({
           account,
           transaction,
         })
-
-        let events = await fetchEvents()
-        let n = events.length
-        console.log(n);
-        console.log(events);
-        let tokenId = Number(events[n - 1].args.contentId)
-        let contentHash = events[n - 1].args.contentHash
-        let userAddress = events[n - 1].args.account
+        // let events = await fetchEvents()
+        // let n = events.length
+        // console.log(n);
+        
+        // console.log(events);
+        let tokenId = contId;
+        let contentHash = ImgHash;       
+         let userAddress = address;
 
         await axios.post('http://localhost:3000/api/', {
           tokenId,
@@ -89,7 +109,6 @@ export default function FileUpload() {
           description,
         })
 
-        console.log('Transaction Hash:', transactionHash)
         alert('Successfully uploaded image!')
         setFileName('No image selected')
         setFile(null)

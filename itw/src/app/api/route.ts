@@ -31,3 +31,4 @@ async function handler(req: NextRequest, res: NextResponse) {
 }
 
 export const POST = handler;
+

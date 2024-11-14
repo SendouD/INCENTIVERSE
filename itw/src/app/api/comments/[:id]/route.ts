@@ -9,6 +9,7 @@ async function handler(req: NextRequest, res: NextResponse) {
     await  connectDB();
 
   if (req.method === 'PATCH') {
+    console.log("hitt")
     const contentID = req.url.split('/').pop(); // Extract content ID from the URL
     const body = await req.json();
     const { text, author } = body;
@@ -41,12 +42,12 @@ async function handler(req: NextRequest, res: NextResponse) {
       const content = await Content.findOne({ tokenId: contentID });
       // console.log(content.comments);
   
-      // if (!content) {
-      //   return NextResponse.json({ message: 'Content not found.' }, { status: 404 });
-      // }
-      if(content){
-        return NextResponse.json({ comments: content.comments, commentersAddress: content.commentersAddress}, { status: 200 });
+      if (!content) {
+        return NextResponse.json({ message: 'Content not found.' }, { status: 404 });
       }
+      
+        return NextResponse.json({ comments: content.comments, commentersAddress: content.commentersAddress}, { status: 200 });
+      
     } catch (error: any) {
       return NextResponse.json({ message: 'Error fetching comments.', error: error.message }, { status: 500 });
     }

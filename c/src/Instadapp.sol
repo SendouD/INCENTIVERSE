@@ -7,7 +7,7 @@ import "./Instken.sol";
 import {console} from "forge-std/console.sol";
 
 contract Instadapp is Ownable {
-    uint256 private count = 0;
+    uint256 public count = 0;
     Instken private tokenContract;
    
     constructor() {
@@ -57,7 +57,7 @@ contract Instadapp is Ownable {
             comments: 0,
             shares: 0
         });
-		        contentdetails[count] = newcontent;
+		contentdetails[count] = newcontent;
 
         // Emit the event for new content
         emit ContentAdded(count, msg.sender, contentHash);
@@ -116,7 +116,7 @@ contract Instadapp is Ownable {
 
     // Internal function to reward the creator with tokens
     function _rewardCreator(address creator, uint256 rewardAmount) internal {
-        tokenContract.mint(creator, rewardAmount);
+       tokenContract.mint(creator, rewardAmount);
     }
 
     // This function now allows the governor contract to set reward rates
