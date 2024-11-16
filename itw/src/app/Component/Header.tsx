@@ -37,6 +37,10 @@ export default function Header() {
             <ConnectButton
               client={client} 
               chain={arbitrumSepolia}
+              // accountAbstraction={{
+              //   chain: arbitrumSepolia, // the chain where your smart accounts will be or is deployed
+              //   sponsorGas: true, // enable or disable sponsored transactions
+              //   }}
             />
           ) : (
             <p className="text-muted-foreground text-lg">Connect your wallet to get started</p>

@@ -7,7 +7,7 @@ import Header from "./Component/Header";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "thirdweb SDK + Next starter",
+  title: "Incentiverse",
   description:
     "Starter template for using thirdweb SDK with Next.js App router",
 };

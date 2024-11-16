@@ -28,8 +28,8 @@ contract Instadapp is Ownable {
     mapping (uint256=>mapping(address=>bool)) private checklikes;
     mapping (uint256=>mapping(address=>bool)) private checkdislikes;
     // Reward rates (in tokens) for each engagement
-    uint256 public rewardPerLike = 1;    // 1 token per like
-    uint256 public rewardPerComment = 2; // 2 tokens per comment
+    uint256 public rewardPerLike = 1;    
+    uint256 public rewardPerComment = 2; 
 
     // Events for content and engagement
     event ContentAdded(uint256 indexed contentId, address indexed account, string contentHash);
